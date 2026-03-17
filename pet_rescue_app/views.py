@@ -70,9 +70,8 @@ def register_view(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            messages.success(request, f'Welcome to PetRescue Pro, {user.username}! Your account is ready.')
-            return redirect('dashboard')
+            messages.success(request, f'Registration successful! Please sign in with your new account, {user.username}.')
+            return redirect('login')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -305,29 +304,37 @@ def search_pets(request):
     filter_type = request.GET.get('type', '').strip() or None
     filter_pet_type = request.GET.get('pet_type', '').strip() or None
     filter_status = request.GET.get('status', '').strip() or None
+    filter_breed = request.GET.get('breed', '').strip() or None
+    filter_color = request.GET.get('color', '').strip() or None
 
-    # Initial queryset: Start with all reports ordered by the latest first
+    # Initial queryset
     results = PetReport.objects.all().order_by('-created_at')
 
-    # Apply keyword search across multiple fields
+    # Smart Keyword Search: Split query into words to match better
     if query:
-        results = results.filter(
-            Q(pet_name__icontains=query) | 
-            Q(pet_type__icontains=query) |
-            Q(breed__icontains=query) | 
-            Q(color__icontains=query) |
-            Q(location__icontains=query) | 
-            Q(description__icontains=query) |
-            Q(phone_number__icontains=query)
-        )
+        words = query.split()
+        for word in words:
+            results = results.filter(
+                Q(pet_name__icontains=word) | 
+                Q(pet_type__icontains=word) |
+                Q(breed__icontains=word) | 
+                Q(color__icontains=word) |
+                Q(location__icontains=word) | 
+                Q(description__icontains=word) |
+                Q(phone_number__icontains=word)
+            )
 
-    # Apply selective filters from dropdowns if they exist
+    # Selective property filters
     if filter_type:
         results = results.filter(report_type=filter_type)
     if filter_pet_type:
-        results = results.filter(pet_type=filter_pet_type)
+        results = results.filter(pet_type__iexact=filter_pet_type)
     if filter_status:
         results = results.filter(status=filter_status)
+    if filter_breed:
+        results = results.filter(breed__icontains=filter_breed)
+    if filter_color:
+        results = results.filter(color__icontains=filter_color)
 
     # Separated results for tabs in the search UI
     lost_results = results.filter(report_type='Lost')
@@ -349,6 +356,8 @@ def search_pets(request):
         'filter_type': filter_type,
         'filter_pet_type': filter_pet_type,
         'filter_status': filter_status,
+        'filter_breed': filter_breed,
+        'filter_color': filter_color,
         'unread_count': unread_count,
     }
     return render(request, 'search.html', context)
