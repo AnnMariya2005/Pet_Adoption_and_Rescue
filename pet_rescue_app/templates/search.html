@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% block title %}Search Pets{% endblock %}
+
+{% block content %}
+<div class="search-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div>
+                <h1 class="page-title"><i class="fas fa-search"></i> Search Pet Reports</h1>
+                <p class="page-subtitle">Search our database of lost and found pets. Filter by type, location, breed, or color.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-page-body">
+
+        <!-- ===== SEARCH & FILTER BAR ===== -->
+        <div class="search-filter-card">
+            <form method="GET" id="searchForm">
+                <div class="search-bar-row">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon-inner"></i>
+                        <input type="text" name="q" id="searchInput"
+                               value="{{ query|default:'' }}"
+                               placeholder="Search by name, breed, color, location..."
+                               autocomplete="off">
+                        {% if query %}
+                        <a href="{% url 'search_pets' %}" class="clear-search"><i class="fas fa-times"></i></a>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label><i class="fas fa-tag"></i> Report Type</label>
+                        <select name="type" onchange="this.form.submit()">
+                            <option value="">All Types</option>
+                            <option value="Lost" {% if filter_type == 'Lost' %}selected{% endif %}>Lost</option>
+                            <option value="Found" {% if filter_type == 'Found' %}selected{% endif %}>Found</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-paw"></i> Animal</label>
+                        <select name="pet_type" onchange="this.form.submit()">
+                            <option value="">All Animals</option>
+                            <option value="Dog" {% if filter_pet_type == 'Dog' %}selected{% endif %}>Dog</option>
+                            <option value="Cat" {% if filter_pet_type == 'Cat' %}selected{% endif %}>Cat</option>
+                            <option value="Bird" {% if filter_pet_type == 'Bird' %}selected{% endif %}>Bird</option>
+                            <option value="Rabbit" {% if filter_pet_type == 'Rabbit' %}selected{% endif %}>Rabbit</option>
+                            <option value="Other" {% if filter_pet_type == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-circle-dot"></i> Status</label>
+                        <select name="status" onchange="this.form.submit()">
+                            <option value="">All Statuses</option>
+                            <option value="Pending" {% if filter_status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Accepted" {% if filter_status == 'Accepted' %}selected{% endif %}>Accepted</option>
+                            <option value="Rejected" {% if filter_status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </div>
+                    {% if query or filter_type or filter_pet_type or filter_status %}
+                    <a href="{% url 'search_pets' %}" class="clear-filters-btn">
+                        <i class="fas fa-filter-circle-xmark"></i> Clear Filters
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- ===== RESULTS ===== -->
+        {% if query or filter_type or filter_pet_type or filter_status %}
+        <div class="results-header">
+            <span class="results-count">
+                <i class="fas fa-list"></i> {{ results.count }} result{{ results.count|pluralize }} found
+                {% if query %} for "<em>{{ query }}</em>"{% endif %}
+            </span>
+        </div>
+        {% endif %}
+
+        <!-- Tabs for Lost / Found -->
+        <div class="search-tabs">
+            <button class="stab active" data-tab="all-tab">
+                <i class="fas fa-th-list"></i> All ({{ results.count }})
+            </button>
+            <button class="stab" data-tab="lost-tab">
+                <i class="fas fa-exclamation-circle"></i> Lost ({{ lost_count }})
+            </button>
+            <button class="stab" data-tab="found-tab">
+                <i class="fas fa-hand-holding-heart"></i> Found ({{ found_count }})
+            </button>
+        </div>
+
+        <!-- ALL RESULTS -->
+        <div class="stab-content active" id="all-tab">
+            {% if results %}
+            <div class="pet-cards-grid">
+                {% for pet in results %}
+                {% include 'partials/pet_search_card.html' %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state large">
+                <i class="fas fa-search"></i>
+                <h3>No results found</h3>
+                <p>Try different keywords or adjust your filters.</p>
+                <a href="{% url 'search_pets' %}" class="btn btn-primary">Reset Search</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- LOST RESULTS -->
+        <div class="stab-content" id="lost-tab">
+            {% if lost_results %}
+            <div class="pet-cards-grid">
+                {% for pet in lost_results %}
+                {% include 'partials/pet_search_card.html' %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>No lost pet reports match your search.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- FOUND RESULTS -->
+        <div class="stab-content" id="found-tab">
+            {% if found_results %}
+            <div class="pet-cards-grid">
+                {% for pet in found_results %}
+                {% include 'partials/pet_search_card.html' %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-hand-holding-heart"></i>
+                <p>No found pet reports match your search.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.stab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.stab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+});
+</script>
+{% endblock %}

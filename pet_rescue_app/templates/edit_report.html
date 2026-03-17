@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}Edit Report{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div>
+                <h1 class="page-title"><i class="fas fa-edit"></i> Edit Report</h1>
+                <p class="page-subtitle">Update the details for <strong>{{ report.pet_name }}</strong></p>
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="form-page-body">
+        <form method="POST" class="report-form" id="editForm" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <!-- Section: Pet Information -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-paw"></i>
+                    <h3>Pet Information</h3>
+                </div>
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label for="pet_name">
+                            Pet Name 
+                            <span id="pet_name_req" class="{% if report.report_type == 'Lost' %}required{% else %}optional{% endif %}">
+                                {% if report.report_type == 'Lost' %}*{% else %}(optional){% endif %}
+                            </span>
+                        </label>
+                        <input type="text" id="pet_name" name="pet_name" value="{{ report.pet_name }}" {% if report.report_type == 'Lost' %}required{% endif %}>
+                    </div>
+                    <div class="form-group">
+                        <label for="pet_type">Animal Type <span class="required">*</span></label>
+                        <input type="text" id="pet_type" name="pet_type" 
+                               list="pet_type_list" 
+                               value="{{ report.pet_type }}" 
+                               placeholder="e.g., Dog, Cat, Lion, Turtle..."
+                               required>
+                        <datalist id="pet_type_list">
+                            <option value="Dog">
+                            <option value="Cat">
+                            <option value="Bird">
+                            <option value="Rabbit">
+                            <option value="Hamster">
+                            <option value="Horse">
+                            <option value="Turtle">
+                        </datalist>
+                        <small class="text-muted">You can select from the list or type your own.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="breed">Breed <span class="required">*</span></label>
+                        <input type="text" id="breed" name="breed" value="{{ report.breed }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="color">Color / Markings <span class="required">*</span></label>
+                        <input type="text" id="color" name="color" value="{{ report.color }}" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="pet_image"><i class="fas fa-image"></i> Change Pet Photo</label>
+                        {% if report.pet_image %}
+                        <div class="current-image-preview">
+                            <img src="{{ report.pet_image.url }}" alt="{{ report.pet_name }}" style="width: 120px; border-radius: 8px; margin-bottom: 10px;">
+                            <p style="font-size: 0.75rem; color: var(--text-3);">Current photo</p>
+                        </div>
+                        {% endif %}
+                        <input type="file" id="pet_image" name="pet_image" accept="image/*">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Location & Contact -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Location & Contact</h3>
+                </div>
+                <div class="form-grid two-col">
+                    <div class="form-group full-width">
+                        <label for="location">Location <span class="required">*</span></label>
+                        <input type="text" id="location" name="location" value="{{ report.location }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_number">Contact Phone <span class="required">*</span></label>
+                        <input type="tel" id="phone_number" name="phone_number" value="{{ report.phone_number }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="report_type">Report Type <span class="required">*</span></label>
+                        <select id="report_type" name="report_type" onchange="toggleNameRequired(this)" required>
+                            <option value="Lost" {% if report.report_type == 'Lost' %}selected{% endif %}>Lost</option>
+                            <option value="Found" {% if report.report_type == 'Found' %}selected{% endif %}>Found</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Description -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-clipboard"></i>
+                    <h3>Description</h3>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description <span class="optional">(optional)</span></label>
+                    <textarea id="description" name="description" rows="5">{{ report.description }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-lg" id="editBtn">
+                    <span class="btn-text"><i class="fas fa-save"></i> Save Changes</span>
+                    <span class="btn-loading" style="display:none"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleNameRequired(select) {
+    const nameInput = document.getElementById('pet_name');
+    const reqSpan = document.getElementById('pet_name_req');
+    if (select.value === 'Lost') {
+        nameInput.required = true;
+        reqSpan.className = 'required';
+        reqSpan.textContent = '*';
+    } else {
+        nameInput.required = false;
+        reqSpan.className = 'optional';
+        reqSpan.textContent = '(optional)';
+    }
+}
+function toggleOtherType(selectObj, divId) {
+    const div = document.getElementById(divId);
+    const otherInp = div.querySelector('input');
+    if (selectObj.value === 'Other') {
+        div.style.display = 'block';
+        otherInp.required = true;
+    } else {
+        div.style.display = 'none';
+        otherInp.required = false;
+        otherInp.value = '';
+    }
+}
+document.getElementById('editForm').addEventListener('submit', function() {
+    const btn = document.getElementById('editBtn');
+    btn.querySelector('.btn-text').style.display = 'none';
+    btn.querySelector('.btn-loading').style.display = 'inline';
+    btn.disabled = true;
+});
+</script>
+{% endblock %}

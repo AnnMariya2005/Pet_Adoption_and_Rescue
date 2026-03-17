@@ -1,0 +1,56 @@
+{% if reports %}
+<div class="table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Pet Name</th>
+                <th>Type</th>
+                <th>Breed</th>
+                <th>Color</th>
+                <th>Location</th>
+                <th>Report Type</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td class="row-num">{{ forloop.counter }}</td>
+                <td><strong>{{ report.pet_name }}</strong></td>
+                <td>{{ report.pet_type }}</td>
+                <td>{{ report.breed|default:"—" }}</td>
+                <td>{{ report.color }}</td>
+                <td><i class="fas fa-map-marker-alt text-muted"></i> {{ report.location }}</td>
+                <td>
+                    <span class="report-type-pill {{ report.report_type|lower }}">
+                        <i class="fas fa-{% if report.report_type == 'Lost' %}exclamation-circle{% else %}hand-holding-heart{% endif %}"></i>
+                        {{ report.report_type }}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-pill {{ report.status|lower }}">{{ report.status }}</span>
+                </td>
+                <td class="text-muted">{{ report.created_at|date:"M d, Y" }}</td>
+                <td class="actions-cell">
+                    <a href="{% url 'edit_report' report.id %}" class="action-btn edit" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="action-btn delete" onclick="confirmDelete({{ report.id }})" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-folder-open"></i>
+    <p>{{ empty_msg }}</p>
+    <a href="{% url 'add_report' %}" class="btn btn-primary btn-sm">Submit a Report</a>
+</div>
+{% endif %}

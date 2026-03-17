@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- ===== HERO SECTION ===== -->
+<section class="hero">
+    <div class="hero-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    <div class="hero-content">
+        <div class="hero-badge"><i class="fas fa-paw"></i> Trusted Pet Rescue Platform</div>
+        <h1 class="hero-title">
+            Reuniting <span class="gradient-text">Lost Pets</span><br>
+            With Their Families
+        </h1>
+        <p class="hero-subtitle">
+            PetRescue Pro connects compassionate finders with worried owners.
+            Report a found pet or search for your missing companion today.
+        </p>
+        <div class="hero-actions">
+            <a href="{% url 'add_report' %}?type=lost" class="btn btn-primary btn-lg">
+                <i class="fas fa-exclamation-circle"></i> Report Lost Pet
+            </a>
+            <a href="{% url 'add_report' %}?type=found" class="btn btn-secondary btn-lg">
+                <i class="fas fa-hand-holding-heart"></i> Report Found Pet
+            </a>
+            <a href="{% url 'search_pets' %}" class="btn btn-outline btn-lg">
+                <i class="fas fa-search"></i> Search Database
+            </a>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <strong>{{ total_reports }}</strong>
+                <span>Reports Filed</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <strong>{{ accepted_reports }}</strong>
+                <span>Happy Reunions</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <strong>24/7</strong>
+                <span>Platform Access</span>
+            </div>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="hero-card-float">
+            <div class="floating-pet-card">
+                <div class="pet-card-icon"><i class="fas fa-dog"></i></div>
+                <div>
+                    <strong>Max - Golden Retriever</strong>
+                    <small><i class="fas fa-map-marker-alt"></i> Downtown</small>
+                </div>
+                <span class="pet-tag found">Found</span>
+            </div>
+            <div class="floating-pet-card">
+                <div class="pet-card-icon cat"><i class="fas fa-cat"></i></div>
+                <div>
+                    <strong>Luna - Persian Cat</strong>
+                    <small><i class="fas fa-map-marker-alt"></i> Westside</small>
+                </div>
+                <span class="pet-tag lost">Lost</span>
+            </div>
+            <div class="floating-pet-card">
+                <div class="pet-card-icon resolved"><i class="fas fa-heart"></i></div>
+                <div>
+                    <strong>Charlie - Beagle</strong>
+                    <small><i class="fas fa-check-circle"></i> Reunited!</small>
+                </div>
+                <span class="pet-tag accepted">Accepted</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section class="section how-it-works">
+    <div class="section-inner">
+        <div class="section-header">
+            <span class="section-eyebrow">Simple & Fast</span>
+            <h2>How PetRescue Works</h2>
+            <p>Three simple steps to reunite pets with their families</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">01</div>
+                <div class="step-icon"><i class="fas fa-user-plus"></i></div>
+                <h3>Create Account</h3>
+                <p>Register for free in under a minute. Your account helps you track all your reports and receive notifications.</p>
+            </div>
+            <div class="step-connector"><i class="fas fa-arrow-right"></i></div>
+            <div class="step-card">
+                <div class="step-number">02</div>
+                <div class="step-icon"><i class="fas fa-file-alt"></i></div>
+                <h3>Submit Report</h3>
+                <p>Provide detailed information about the lost or found pet — breed, color, location, and contact details.</p>
+            </div>
+            <div class="step-connector"><i class="fas fa-arrow-right"></i></div>
+            <div class="step-card">
+                <div class="step-number">03</div>
+                <div class="step-icon"><i class="fas fa-heart"></i></div>
+                <h3>Get Reunited</h3>
+                <p>Our team reviews reports and matches pets with their owners. You'll receive real-time notifications on status updates.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== RECENT REPORTS ===== -->
+{% if lost_pets or found_pets %}
+<section class="section recent-reports">
+    <div class="section-inner">
+        <div class="section-header">
+            <span class="section-eyebrow">Latest Activity</span>
+            <h2>Recent Pet Reports</h2>
+        </div>
+        <div class="reports-tabs" id="reportsTabs">
+            <button class="tab-btn active" data-tab="lost-tab"><i class="fas fa-exclamation-circle"></i> Lost Pets ({{ lost_pets|length }})</button>
+            <button class="tab-btn" data-tab="found-tab"><i class="fas fa-hand-holding-heart"></i> Found Pets ({{ found_pets|length }})</button>
+        </div>
+
+        <!-- Lost Pets Tab -->
+        <div class="tab-content active" id="lost-tab">
+            {% if lost_pets %}
+            <div class="pet-cards-grid">
+                {% for pet in lost_pets %}
+                <div class="pet-card">
+                    <div class="pet-card-header lost">
+                        <span class="pet-type-icon"><i class="fas fa-{% if pet.pet_type|lower == 'dog' %}dog{% elif pet.pet_type|lower == 'cat' %}cat{% else %}paw{% endif %}"></i></span>
+                        <span class="pet-report-badge lost">Lost</span>
+                    </div>
+                    <div class="pet-card-body">
+                        <h4>{{ pet.pet_name }}</h4>
+                        <div class="pet-details">
+                            <span><i class="fas fa-tag"></i> {{ pet.pet_type }}{% if pet.breed %} — {{ pet.breed }}{% endif %}</span>
+                            <span><i class="fas fa-palette"></i> {{ pet.color }}</span>
+                            <span><i class="fas fa-map-marker-alt"></i> {{ pet.location }}</span>
+                            <span><i class="fas fa-calendar"></i> {{ pet.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="pet-card-footer">
+                        <span class="status-pill {{ pet.status|lower }}">{{ pet.status }}</span>
+                        {% if pet.phone_number %}
+                        <a href="tel:{{ pet.phone_number }}" class="contact-btn"><i class="fas fa-phone"></i> Contact</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <p>No lost pet reports at the moment.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Found Pets Tab -->
+        <div class="tab-content" id="found-tab">
+            {% if found_pets %}
+            <div class="pet-cards-grid">
+                {% for pet in found_pets %}
+                <div class="pet-card">
+                    <div class="pet-card-header found">
+                        <span class="pet-type-icon"><i class="fas fa-{% if pet.pet_type|lower == 'dog' %}dog{% elif pet.pet_type|lower == 'cat' %}cat{% else %}paw{% endif %}"></i></span>
+                        <span class="pet-report-badge found">Found</span>
+                    </div>
+                    <div class="pet-card-body">
+                        <h4>{{ pet.pet_name }}</h4>
+                        <div class="pet-details">
+                            <span><i class="fas fa-tag"></i> {{ pet.pet_type }}{% if pet.breed %} — {{ pet.breed }}{% endif %}</span>
+                            <span><i class="fas fa-palette"></i> {{ pet.color }}</span>
+                            <span><i class="fas fa-map-marker-alt"></i> {{ pet.location }}</span>
+                            <span><i class="fas fa-calendar"></i> {{ pet.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="pet-card-footer">
+                        <span class="status-pill {{ pet.status|lower }}">{{ pet.status }}</span>
+                        {% if pet.phone_number %}
+                        <a href="tel:{{ pet.phone_number }}" class="contact-btn"><i class="fas fa-phone"></i> Contact</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-hand-holding-heart"></i>
+                <p>No found pet reports at the moment.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section-cta">
+            <a href="{% url 'search_pets' %}" class="btn btn-primary">View All Reports <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ===== CTA SECTION ===== -->
+<section class="section cta-section">
+    <div class="cta-inner">
+        <div class="cta-icon"><i class="fas fa-paw"></i></div>
+        <h2>Have You Found a Pet?</h2>
+        <p>Don't wait — every minute counts. Submit a report now and help a family find their beloved companion.</p>
+        <div class="cta-buttons">
+            {% if user.is_authenticated %}
+            <a href="{% url 'add_report' %}?type=found" class="btn btn-white btn-lg">
+                <i class="fas fa-hand-holding-heart"></i> Report Found Pet
+            </a>
+            <a href="{% url 'add_report' %}?type=lost" class="btn btn-outline-white btn-lg">
+                <i class="fas fa-exclamation-circle"></i> Report Lost Pet
+            </a>
+            {% else %}
+            <a href="{% url 'register' %}" class="btn btn-white btn-lg">
+                <i class="fas fa-user-plus"></i> Get Started Free
+            </a>
+            <a href="{% url 'search_pets' %}" class="btn btn-outline-white btn-lg">
+                <i class="fas fa-search"></i> Search First
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        const target = document.getElementById(btn.dataset.tab);
+        if (target) target.classList.add('active');
+    });
+});
+
+// Animate hero stats on intersection
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.classList.add('animated');
+        }
+    });
+}, { threshold: 0.1 });
+document.querySelectorAll('.step-card, .pet-card').forEach(el => observer.observe(el));
+</script>
+{% endblock %}

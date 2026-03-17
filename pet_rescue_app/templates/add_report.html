@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% block title %}{% if report_type == 'Lost' %}Report Lost Pet{% else %}Report Found Pet{% endif %}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div>
+                {% if report_type == 'Lost' %}
+                <h1 class="page-title text-danger"><i class="fas fa-exclamation-circle"></i> Report a Lost Pet</h1>
+                <p class="page-subtitle">Provide as much detail as possible to help others identify your pet.</p>
+                {% else %}
+                <h1 class="page-title text-success"><i class="fas fa-hand-holding-heart"></i> Report a Found Pet</h1>
+                <p class="page-subtitle">Help us reunite this pet with their family by sharing detailed information.</p>
+                {% endif %}
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="form-page-body">
+        <div class="report-type-toggle">
+            <a href="{% url 'add_report' %}?type=lost"
+               class="type-toggle-btn {% if report_type == 'Lost' %}active lost{% endif %}">
+                <i class="fas fa-exclamation-circle"></i> Lost Pet
+            </a>
+            <a href="{% url 'add_report' %}?type=found"
+               class="type-toggle-btn {% if report_type == 'Found' %}active found{% endif %}">
+                <i class="fas fa-hand-holding-heart"></i> Found Pet
+            </a>
+        </div>
+
+        {% if success %}
+        <div class="success-card" id="successCard">
+            <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+            <h3>Report Submitted Successfully!</h3>
+            <p>Your <strong>{{ report_type }}</strong> pet report has been submitted and is pending admin review. You will be notified when the status changes.</p>
+            <div class="success-actions">
+                <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+                <a href="{% url 'add_report' %}?type={{ report_type|lower }}" class="btn btn-outline">Submit Another</a>
+            </div>
+        </div>
+        {% else %}
+
+        <form method="POST" class="report-form" id="reportForm" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="report_type" value="{{ report_type }}">
+
+            <!-- Section: Pet Information -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-paw"></i>
+                    <h3>Pet Information</h3>
+                </div>
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label for="pet_name">
+                            Pet Name 
+                            {% if report_type == 'Lost' %}<span class="required">*</span>{% else %}<span class="optional">(optional)</span>{% endif %}
+                        </label>
+                        <input type="text" id="pet_name" name="pet_name" 
+                               placeholder="e.g., Max, Luna, Buddy" 
+                               {% if report_type == 'Lost' %}required{% endif %}>
+                    </div>
+                    <div class="form-group">
+                        <label for="pet_type">Animal Type <span class="required">*</span></label>
+                        <input type="text" id="pet_type" name="pet_type" 
+                               list="pet_type_list" 
+                               value="{{ data.pet_type }}" 
+                               placeholder="e.g., Dog, Cat, Lion, Turtle..."
+                               required>
+                        <datalist id="pet_type_list">
+                            <option value="Dog">
+                            <option value="Cat">
+                            <option value="Bird">
+                            <option value="Rabbit">
+                            <option value="Hamster">
+                            <option value="Horse">
+                            <option value="Turtle">
+                        </datalist>
+                        <small class="text-muted">You can select from the list or type your own.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="breed">Breed <span class="required">*</span></label>
+                        <input type="text" id="breed" name="breed" placeholder="e.g., Golden Retriever, Persian" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="color">Color / Markings <span class="required">*</span></label>
+                        <input type="text" id="color" name="color" placeholder="e.g., Golden with white chest" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="pet_image"><i class="fas fa-image"></i> Pet Photo</label>
+                        <input type="file" id="pet_image" name="pet_image" accept="image/*">
+                        <div class="field-feedback">Uploading a photo greatly increases chances of success.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Location & Contact -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Location & Contact</h3>
+                </div>
+                <div class="form-grid two-col">
+                    <div class="form-group full-width">
+                        <label for="location">
+                            {% if report_type == 'Lost' %}Last Seen Location{% else %}Where Found{% endif %}
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" id="location" name="location"
+                               placeholder="{% if report_type == 'Lost' %}Street, area, or landmark where pet was last seen{% else %}Street, area, or landmark where you found the pet{% endif %}"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_number">Contact Phone <span class="required">*</span></label>
+                        <input type="tel" id="phone_number" name="phone_number"
+                               placeholder="e.g., +91 98765 43210" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Description -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-clipboard"></i>
+                    <h3>Additional Details</h3>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description <span class="optional">(optional)</span></label>
+                    <textarea id="description" name="description" rows="5"
+                              placeholder="Describe the pet's appearance, behavior, collar/tag details, microchip number, any distinguishing features, when and where it was last seen..."></textarea>
+                    <div class="char-counter"><span id="descCount">0</span>/500 characters</div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn {% if report_type == 'Lost' %}btn-danger{% else %}btn-success{% endif %} btn-lg" id="submitBtn">
+                    <span class="btn-text">
+                        <i class="fas fa-{% if report_type == 'Lost' %}exclamation-circle{% else %}hand-holding-heart{% endif %}"></i>
+                        Submit {% if report_type == 'Lost' %}Lost{% else %}Found{% endif %} Pet Report
+                    </span>
+                    <span class="btn-loading" style="display:none"><i class="fas fa-spinner fa-spin"></i> Submitting...</span>
+                </button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleOtherType(selectObj, divId) {
+    const div = document.getElementById(divId);
+    const otherInp = div.querySelector('input');
+    if (selectObj.value === 'Other') {
+        div.style.display = 'block';
+        otherInp.required = true;
+    } else {
+        div.style.display = 'none';
+        otherInp.required = false;
+        otherInp.value = '';
+    }
+}
+// Character counter for description
+const desc = document.getElementById('description');
+const counter = document.getElementById('descCount');
+if (desc && counter) {
+    desc.addEventListener('input', () => {
+        counter.textContent = desc.value.length;
+        if (desc.value.length > 450) counter.parentElement.style.color = '#f59e0b';
+        else counter.parentElement.style.color = '';
+    });
+}
+
+// Form submit loading
+const form = document.getElementById('reportForm');
+if (form) {
+    form.addEventListener('submit', function(e) {
+        // Basic validation
+        let valid = true;
+        form.querySelectorAll('[required]').forEach(input => {
+            if (!input.value.trim()) {
+                input.style.borderColor = '#ef4444';
+                valid = false;
+            } else {
+                input.style.borderColor = '';
+            }
+        });
+        if (!valid) {
+            e.preventDefault();
+            showToast('Please fill in all required fields.', 'error');
+            return;
+        }
+        const btn = document.getElementById('submitBtn');
+        btn.querySelector('.btn-text').style.display = 'none';
+        btn.querySelector('.btn-loading').style.display = 'inline';
+        btn.disabled = true;
+    });
+}
+</script>
+{% endblock %}

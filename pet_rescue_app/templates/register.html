@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-split">
+
+        <!-- LEFT PANEL -->
+        <div class="auth-left">
+            <div class="auth-left-content">
+                <div class="auth-logo">
+                    <div class="logo-icon"><i class="fas fa-paw"></i></div>
+                    <span>PetRescue <em>Pro</em></span>
+                </div>
+                <h2>Join Our Community</h2>
+                <p>Create an account to start reporting lost and found pets, track your submissions, and help reunite families with their beloved animals.</p>
+                <ul class="auth-features">
+                    <li><i class="fas fa-check-circle"></i> Submit lost & found pet reports</li>
+                    <li><i class="fas fa-check-circle"></i> Track report status in real-time</li>
+                    <li><i class="fas fa-check-circle"></i> Receive instant notifications</li>
+                    <li><i class="fas fa-check-circle"></i> Search our entire database</li>
+                </ul>
+                <div class="auth-quote">
+                    <i class="fas fa-quote-left"></i>
+                    "Every pet deserves to find its way home."
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: FORM -->
+        <div class="auth-right">
+            <div class="auth-card">
+                <div class="auth-card-header">
+                    <h1>Create Account</h1>
+                    <p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+                </div>
+
+                {% if form.errors %}
+                <div class="form-error-banner">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Please fix the errors below to continue.
+                </div>
+                {% endif %}
+
+                <form method="POST" id="registerForm" novalidate>
+                    {% csrf_token %}
+
+                    <div class="form-row">
+                        <div class="form-group" id="fg-username">
+                            <label for="id_username"><i class="fas fa-user"></i> Username <span class="required">*</span></label>
+                            <input type="text" id="id_username" name="username"
+                                   value="{{ form.username.value|default:'' }}"
+                                   placeholder="Choose a username"
+                                   autocomplete="username" required>
+                            <div class="field-feedback" id="fb-username"></div>
+                            {% if form.username.errors %}
+                            <div class="field-error"><i class="fas fa-times-circle"></i> {{ form.username.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div class="form-group" id="fg-email">
+                            <label for="id_email"><i class="fas fa-envelope"></i> Email <span class="optional">(optional)</span></label>
+                            <input type="email" id="id_email" name="email"
+                                   value="{{ form.email.value|default:'' }}"
+                                   placeholder="you@example.com"
+                                   autocomplete="email">
+                            <div class="field-feedback" id="fb-email"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="fg-password1">
+                        <label for="id_password1"><i class="fas fa-lock"></i> Password <span class="required">*</span></label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="id_password1" name="password1"
+                                   placeholder="Create a strong password"
+                                   autocomplete="new-password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('id_password1', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="field-feedback" id="fb-password1"></div>
+                        {% if form.password1.errors %}
+                        <div class="field-error"><i class="fas fa-times-circle"></i> {{ form.password1.errors|join:", " }}</div>
+                        {% endif %}
+
+                        <!-- Password Strength -->
+                        <div class="password-strength" id="strengthBar">
+                            <div class="strength-progress" id="strengthProgress"></div>
+                        </div>
+                        <div class="strength-label" id="strengthLabel"></div>
+
+                        <!-- Password Requirements (clean list) -->
+                        <ul class="password-requirements" id="pwdReqs">
+                            <li id="req-length"><i class="fas fa-circle"></i> At least 8 characters</li>
+                            <li id="req-upper"><i class="fas fa-circle"></i> One uppercase letter</li>
+                            <li id="req-number"><i class="fas fa-circle"></i> One number</li>
+                            <li id="req-special"><i class="fas fa-circle"></i> One special character</li>
+                            <li id="req-no-common"><i class="fas fa-circle"></i> Not a common password</li>
+                        </ul>
+                    </div>
+
+                    <div class="form-group" id="fg-password2">
+                        <label for="id_password2"><i class="fas fa-lock-open"></i> Confirm Password <span class="required">*</span></label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="id_password2" name="password2"
+                                   placeholder="Re-enter your password"
+                                   autocomplete="new-password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('id_password2', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="field-feedback" id="fb-password2"></div>
+                        {% if form.password2.errors %}
+                        <div class="field-error"><i class="fas fa-times-circle"></i> {{ form.password2.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary btn-full submit-btn" id="registerBtn">
+                        <span class="btn-text"><i class="fas fa-user-plus"></i> Create Account</span>
+                        <span class="btn-loading" style="display:none"><i class="fas fa-spinner fa-spin"></i> Creating...</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePassword(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
+// ---- Password strength checker ----
+const pwd1 = document.getElementById('id_password1');
+const pwd2 = document.getElementById('id_password2');
+
+pwd1.addEventListener('input', () => {
+    const val = pwd1.value;
+    checkStrength(val);
+    checkReqs(val);
+});
+
+pwd2.addEventListener('input', () => {
+    const fb = document.getElementById('fb-password2');
+    if (pwd2.value && pwd2.value !== pwd1.value) {
+        fb.textContent = '✗ Passwords do not match';
+        fb.className = 'field-feedback error';
+    } else if (pwd2.value) {
+        fb.textContent = '✓ Passwords match';
+        fb.className = 'field-feedback success';
+    } else {
+        fb.textContent = '';
+    }
+});
+
+function checkReqs(val) {
+    setReq('req-length', val.length >= 8);
+    setReq('req-upper', /[A-Z]/.test(val));
+    setReq('req-number', /[0-9]/.test(val));
+    setReq('req-special', /[^A-Za-z0-9]/.test(val));
+    setReq('req-no-common', val.length > 0 && !['password','123456','12345678','qwerty'].includes(val.toLowerCase()));
+}
+
+function setReq(id, met) {
+    const el = document.getElementById(id);
+    el.className = met ? 'met' : '';
+    el.querySelector('i').className = met ? 'fas fa-check-circle' : 'fas fa-circle';
+}
+
+function checkStrength(val) {
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (val.length >= 12) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const prog = document.getElementById('strengthProgress');
+    const label = document.getElementById('strengthLabel');
+    const pct = (score / 5) * 100;
+    prog.style.width = pct + '%';
+
+    if (score <= 1) { prog.style.background = '#ef4444'; label.textContent = 'Weak'; label.style.color = '#ef4444'; }
+    else if (score <= 2) { prog.style.background = '#f59e0b'; label.textContent = 'Fair'; label.style.color = '#f59e0b'; }
+    else if (score <= 3) { prog.style.background = '#3b82f6'; label.textContent = 'Good'; label.style.color = '#3b82f6'; }
+    else if (score <= 4) { prog.style.background = '#8b5cf6'; label.textContent = 'Strong'; label.style.color = '#8b5cf6'; }
+    else { prog.style.background = '#10b981'; label.textContent = 'Very Strong'; label.style.color = '#10b981'; }
+}
+
+// Validation on username
+document.getElementById('id_username').addEventListener('input', function() {
+    const fb = document.getElementById('fb-username');
+    const val = this.value.trim();
+    if (val.length < 3) {
+        fb.textContent = 'Username must be at least 3 characters.';
+        fb.className = 'field-feedback error';
+    } else if (!/^[a-zA-Z0-9_]+$/.test(val)) {
+        fb.textContent = 'Only letters, numbers, and underscores allowed.';
+        fb.className = 'field-feedback error';
+    } else {
+        fb.textContent = '✓ Looks good!';
+        fb.className = 'field-feedback success';
+    }
+});
+
+// Form submit loading
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const pwd2 = document.getElementById('id_password2');
+    const pwd1 = document.getElementById('id_password1');
+    if (pwd2.value !== pwd1.value) {
+        e.preventDefault();
+        const fb = document.getElementById('fb-password2');
+        fb.textContent = '✗ Passwords do not match';
+        fb.className = 'field-feedback error';
+        return;
+    }
+    const btn = document.getElementById('registerBtn');
+    btn.querySelector('.btn-text').style.display = 'none';
+    btn.querySelector('.btn-loading').style.display = 'inline';
+    btn.disabled = true;
+});
+</script>
+{% endblock %}

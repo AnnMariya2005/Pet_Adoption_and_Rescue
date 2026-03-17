@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="notifications-page">
+
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div>
+                <h1 class="page-title"><i class="fas fa-bell"></i> Notifications</h1>
+                <p class="page-subtitle">Stay updated on your pet report statuses.</p>
+            </div>
+            {% if notifications %}
+            <form method="POST" action="{% url 'mark_all_read' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline btn-sm">
+                    <i class="fas fa-check-double"></i> Mark All as Read
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="notif-page-body">
+        {% if notifications %}
+
+        <!-- Summary badges -->
+        <div class="notif-summary">
+            <span class="notif-count-badge">
+                <i class="fas fa-envelope"></i> {{ unread_count }} unread
+            </span>
+            <span class="notif-total">{{ notifications|length }} total notification{{ notifications|length|pluralize }}</span>
+        </div>
+
+        <div class="notif-list">
+            {% for notif in notifications %}
+            <div class="notif-item {% if not notif.is_read %}unread{% endif %}">
+                <div class="notif-icon">
+                    {% if 'accepted' in notif.message|lower %}
+                    <i class="fas fa-check-circle success"></i>
+                    {% elif 'rejected' in notif.message|lower %}
+                    <i class="fas fa-times-circle danger"></i>
+                    {% elif 'pending' in notif.message|lower %}
+                    <i class="fas fa-clock warning"></i>
+                    {% else %}
+                    <i class="fas fa-info-circle info"></i>
+                    {% endif %}
+                </div>
+                <div class="notif-body">
+                    <p class="notif-msg">{{ notif.message }}</p>
+                    <span class="notif-time">
+                        <i class="fas fa-clock"></i>
+                        {{ notif.created_at|date:"M d, Y — g:i A" }}
+                    </span>
+                </div>
+                {% if not notif.is_read %}
+                <div class="notif-unread-dot"></div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty-state large">
+            <div class="empty-icon"><i class="fas fa-bell-slash"></i></div>
+            <h3>No Notifications Yet</h3>
+            <p>When the admin updates your pet report status, you'll receive a notification here.</p>
+            <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
