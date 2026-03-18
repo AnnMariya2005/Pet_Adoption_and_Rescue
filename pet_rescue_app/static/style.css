@@ -686,12 +686,14 @@ input:checked + .custom-checkbox::after { content: '\f00c'; font-family: 'Font A
 .stat-card-v2.green  { border-top: 3px solid #10b981; }
 .stat-card-v2.red    { border-top: 3px solid #ef4444; }
 .stat-card-v2.purple { border-top: 3px solid #8b5cf6; }
+.stat-card-v2.indigo { border-top: 3px solid #6366f1; }
 .stat-icon { font-size: 22px; }
 .stat-card-v2.blue .stat-icon   { color: #60a5fa; }
 .stat-card-v2.amber .stat-icon  { color: #fbbf24; }
 .stat-card-v2.green .stat-icon  { color: #34d399; }
 .stat-card-v2.red .stat-icon    { color: #f87171; }
 .stat-card-v2.purple .stat-icon { color: #a78bfa; }
+.stat-card-v2.indigo .stat-icon { color: #818cf8; }
 .stat-num { display: block; font-size: 1.8rem; font-weight: 800; color: #fff; line-height: 1; }
 .stat-lbl { display: block; font-size: .78rem; color: var(--text-3); margin-top: 4px; }
 

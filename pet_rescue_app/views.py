@@ -119,7 +119,8 @@ def home_view(request):
     lost_pets = PetReport.objects.filter(report_type='Lost').order_by('-created_at')[:6]
     found_pets = PetReport.objects.filter(report_type='Found').order_by('-created_at')[:6]
     total_reports = PetReport.objects.count()
-    accepted_reports = PetReport.objects.filter(status='Accepted').count()
+    # "Happy Reunions" now counts pets that are 'Closed' (Journey complete)
+    reunited_count = PetReport.objects.filter(status='Closed').count()
 
     unread_count = 0
     if request.user.is_authenticated:
@@ -129,7 +130,7 @@ def home_view(request):
         'lost_pets': lost_pets,
         'found_pets': found_pets,
         'total_reports': total_reports,
-        'accepted_reports': accepted_reports,
+        'accepted_reports': reunited_count,
         'unread_count': unread_count,
     })
 
@@ -159,6 +160,7 @@ def dashboard(request):
         'pending_reports': my_reports.filter(status='Pending').count(),
         'accepted_reports': my_reports.filter(status='Accepted').count(),
         'rejected_reports': my_reports.filter(status='Rejected').count(),
+        'closed_reports': my_reports.filter(status='Closed').count(),
         'lost_count': my_lost_reports.count(),
         'found_count': my_found_reports.count(),
 
