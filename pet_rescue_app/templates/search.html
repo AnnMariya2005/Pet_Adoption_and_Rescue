@@ -91,17 +91,24 @@
         </div>
         {% endif %}
 
+        <!-- ===== DISCOVERY MAP ===== -->
+        <div class="search-map-wrapper">
+            <div id="searchMap" style="height: 400px; border-radius: 12px; margin-bottom: 30px; border: 1px solid var(--border);"></div>
+        </div>
+
         <!-- Tabs for Lost / Found -->
-        <div class="search-tabs">
-            <button class="stab active" data-tab="all-tab">
-                <i class="fas fa-th-list"></i> All ({{ results.count }})
-            </button>
-            <button class="stab" data-tab="lost-tab">
-                <i class="fas fa-exclamation-circle"></i> Lost ({{ lost_count }})
-            </button>
-            <button class="stab" data-tab="found-tab">
-                <i class="fas fa-hand-holding-heart"></i> Found ({{ found_count }})
-            </button>
+        <div class="search-tabs-container">
+            <div class="search-tabs">
+                <button class="stab active" data-tab="all-tab">
+                    <i class="fas fa-th-list"></i> All ({{ results.count }})
+                </button>
+                <button class="stab" data-tab="lost-tab">
+                    <i class="fas fa-exclamation-circle"></i> Lost ({{ lost_count }})
+                </button>
+                <button class="stab" data-tab="found-tab">
+                    <i class="fas fa-hand-holding-heart"></i> Found ({{ found_count }})
+                </button>
+            </div>
         </div>
 
         <!-- ALL RESULTS -->
