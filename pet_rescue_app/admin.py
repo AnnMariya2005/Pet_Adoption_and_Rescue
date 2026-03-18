@@ -12,16 +12,17 @@ admin.site.index_title  = "Management Dashboard"
 class PetReportAdmin(admin.ModelAdmin):
 
     list_display = (
-        'pet_name', 'pet_image_preview', 'pet_type', 'breed', 'color',
-        'report_type_badge', 'status_badge',
+        'pet_name', 'user', 'pet_image_preview', 'pet_type', 'breed', 'color',
+        'report_type_badge', 'status_badge', 'status',
         'location', 'phone_number',
-        'user', 'created_at',
+        'created_at',
     )
 
-    list_filter  = ('status', 'report_type', 'pet_type', 'created_at')
+    list_filter  = ('status', 'report_type', 'pet_type', 'user', 'created_at')
     search_fields = ('pet_name', 'breed', 'location', 'color', 'user__username', 'phone_number')
     ordering = ('-created_at',)
     readonly_fields = ('user', 'created_at', 'updated_at')
+    list_editable = ('status',)
     list_per_page = 25
 
     fieldsets = (
@@ -31,9 +32,8 @@ class PetReportAdmin(admin.ModelAdmin):
         ('Report Info', {
             'fields': ('report_type', 'status', 'location', 'phone_number')
         }),
-        ('System', {
+        ('System Information', {
             'fields': ('user', 'created_at', 'updated_at'),
-            'classes': ('collapse',),
         }),
     )
 
@@ -74,15 +74,20 @@ class PetReportAdmin(admin.ModelAdmin):
                 if old_report.status != obj.status:
                     Notification.objects.create(
                         user=obj.user,
-                        message=(
-                            f"Your {obj.report_type} pet report for '{obj.pet_name}' "
-                            f"has been updated to: {obj.status}. "
-                            f"{'Great news — it has been accepted!' if obj.status == 'Accepted' else ''}"
-                        )
+                        message=f"Your report '{obj.pet_name or 'unnamed pet'}' status changed to {obj.status}."
                     )
             except PetReport.DoesNotExist:
                 pass
         super().save_model(request, obj, form, change)
+
+    def save_changelist_model(self, request, obj, form, change):
+        # Handle list_editable updates specially for pet notifications
+        if change and 'status' in form.changed_data:
+            Notification.objects.create(
+                user=obj.user,
+                message=f"Your report '{obj.pet_name or 'unnamed pet'}' status changed to {obj.status}."
+            )
+        super().save_changelist_model(request, obj, form, change)
 
 
 @admin.register(Notification)

@@ -35,12 +35,22 @@
                 </td>
                 <td class="text-muted">{{ report.created_at|date:"M d, Y" }}</td>
                 <td class="actions-cell">
+                    {% if report.user == user %}
                     <a href="{% url 'edit_report' report.id %}" class="action-btn edit" title="Edit">
                         <i class="fas fa-edit"></i>
                     </a>
                     <button class="action-btn delete" onclick="confirmDelete({{ report.id }})" title="Delete">
                         <i class="fas fa-trash-alt"></i>
                     </button>
+                    {% else %}
+                    {% if report.phone_number %}
+                    <a href="tel:{{ report.phone_number }}" class="action-btn contact" title="Contact Owner/Finder" style="color: var(--success);">
+                        <i class="fas fa-phone"></i>
+                    </a>
+                    {% else %}
+                    <span class="text-muted" title="No contact info">N/A</span>
+                    {% endif %}
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

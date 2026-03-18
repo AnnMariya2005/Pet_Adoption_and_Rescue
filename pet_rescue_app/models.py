@@ -18,13 +18,13 @@ class PetReport(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    pet_name = models.CharField(max_length=100)
+    pet_name = models.CharField(max_length=100, null=True, blank=True)
     pet_type = models.CharField(max_length=50)
-    breed = models.CharField(max_length=100)
-    color = models.CharField(max_length=100)
+    breed = models.CharField(max_length=100, null=True, blank=True)
+    color = models.CharField(max_length=100, null=True, blank=True)
 
     location = models.CharField(max_length=200)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
 
     phone_number = models.CharField(max_length=15, null=True, blank=True)
 

@@ -113,8 +113,8 @@ def logout_view(request):
 # ======================= HOME =======================
 
 def home_view(request):
-    if request.user.is_authenticated:
-        return redirect('dashboard')
+    # Removed mandatory redirect to dashboard for logged-in users 
+    # to allow them to browse the landing page.
     
     lost_pets = PetReport.objects.filter(report_type='Lost').order_by('-created_at')[:6]
     found_pets = PetReport.objects.filter(report_type='Found').order_by('-created_at')[:6]
@@ -138,22 +138,34 @@ def home_view(request):
 
 @login_required
 def dashboard(request):
-    reports = PetReport.objects.filter(user=request.user).order_by('-created_at')
-    lost_reports = reports.filter(report_type='Lost')
-    found_reports = reports.filter(report_type='Found')
+    # User's own reports
+    my_reports = PetReport.objects.filter(user=request.user).order_by('-created_at')
+    my_lost_reports = my_reports.filter(report_type='Lost')
+    my_found_reports = my_reports.filter(report_type='Found')
+
+    # Community reports (excluding user's own to avoid duplication or just all)
+    # Let's show all latest reports to keep the user informed
+    community_lost = PetReport.objects.filter(report_type='Lost').exclude(user=request.user).order_by('-created_at')[:10]
+    community_found = PetReport.objects.filter(report_type='Found').exclude(user=request.user).order_by('-created_at')[:10]
 
     unread_notifications = Notification.objects.filter(user=request.user, is_read=False).count()
 
     context = {
-        'reports': reports,
-        'lost_reports': lost_reports,
-        'found_reports': found_reports,
-        'total_reports': reports.count(),
-        'pending_reports': reports.filter(status='Pending').count(),
-        'accepted_reports': reports.filter(status='Accepted').count(),
-        'rejected_reports': reports.filter(status='Rejected').count(),
-        'lost_count': lost_reports.count(),
-        'found_count': found_reports.count(),
+        # My reports data
+        'reports': my_reports,
+        'lost_reports': my_lost_reports,
+        'found_reports': my_found_reports,
+        'total_reports': my_reports.count(),
+        'pending_reports': my_reports.filter(status='Pending').count(),
+        'accepted_reports': my_reports.filter(status='Accepted').count(),
+        'rejected_reports': my_reports.filter(status='Rejected').count(),
+        'lost_count': my_lost_reports.count(),
+        'found_count': my_found_reports.count(),
+
+        # Community reports data
+        'community_lost': community_lost,
+        'community_found': community_found,
+
         'unread_notifications': unread_notifications,
         'unread_count': unread_notifications,
     }

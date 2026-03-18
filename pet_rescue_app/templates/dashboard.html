@@ -89,25 +89,41 @@
         <!-- ===== REPORTS SECTION ===== -->
         <div class="reports-panel">
             <div class="panel-header">
-                <h2><i class="fas fa-list-alt"></i> My Reports</h2>
-                <div class="panel-tabs" id="dashTabs">
-                    <button class="ptab active" data-target="all-reports">All ({{ total_reports }})</button>
-                    <button class="ptab" data-target="lost-reports">Lost ({{ lost_count }})</button>
-                    <button class="ptab" data-target="found-reports">Found ({{ found_count }})</button>
+                <h2><i class="fas fa-list-alt"></i> My Activity</h2>
+                <div class="panel-tabs">
+                    <button class="ptab active" data-target="my-all">My Reports ({{ total_reports }})</button>
+                    <button class="ptab" data-target="my-lost">My Lost ({{ lost_count }})</button>
+                    <button class="ptab" data-target="my-found">My Found ({{ found_count }})</button>
                 </div>
             </div>
 
-            <!-- ALL REPORTS -->
-            <div class="tab-pane active" id="all-reports">
+            <!-- MY REPORTS -->
+            <div class="tab-pane active" id="my-all">
                 {% include 'partials/report_table.html' with reports=reports empty_msg="You have no reports yet." %}
             </div>
-            <!-- LOST REPORTS -->
-            <div class="tab-pane" id="lost-reports">
+            <div class="tab-pane" id="my-lost">
                 {% include 'partials/report_table.html' with reports=lost_reports empty_msg="No lost pet reports." %}
             </div>
-            <!-- FOUND REPORTS -->
-            <div class="tab-pane" id="found-reports">
+            <div class="tab-pane" id="my-found">
                 {% include 'partials/report_table.html' with reports=found_reports empty_msg="No found pet reports." %}
+            </div>
+        </div>
+
+        <div class="reports-panel" style="margin-top: 30px;">
+            <div class="panel-header">
+                <h2><i class="fas fa-users"></i> Community Reports</h2>
+                <div class="panel-tabs">
+                    <button class="ptab active" data-target="comm-lost">Recent Lost</button>
+                    <button class="ptab" data-target="comm-found">Recent Found</button>
+                </div>
+            </div>
+
+            <!-- COMMUNITY REPORTS -->
+            <div class="tab-pane active" id="comm-lost">
+                {% include 'partials/report_table.html' with reports=community_lost empty_msg="No community lost reports at the moment." %}
+            </div>
+            <div class="tab-pane" id="comm-found">
+                {% include 'partials/report_table.html' with reports=community_found empty_msg="No community found reports at the moment." %}
             </div>
         </div>
 
@@ -134,14 +150,21 @@
 
 {% block extra_js %}
 <script>
-// Tab switching
-document.querySelectorAll('.ptab').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        const target = document.getElementById(btn.dataset.target);
-        if (target) target.classList.add('active');
+// Tab switching scoped to panels
+document.querySelectorAll('.reports-panel').forEach(panel => {
+    const tabs = panel.querySelectorAll('.ptab');
+    const panes = panel.querySelectorAll('.tab-pane');
+    
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Only affect tabs and panes within THIS panel
+            tabs.forEach(b => b.classList.remove('active'));
+            panes.forEach(p => p.classList.remove('active'));
+            
+            btn.classList.add('active');
+            const target = document.getElementById(btn.dataset.target);
+            if (target) target.classList.add('active');
+        });
     });
 });
 
