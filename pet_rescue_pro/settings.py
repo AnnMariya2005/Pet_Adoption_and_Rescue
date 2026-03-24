@@ -70,7 +70,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'pet_rescue_db',
-        'USER': 'pet_user',
+        'USER': 'ann',
         'PASSWORD': 'ann2005',
         'HOST': 'localhost',
         'PORT': '5432',
@@ -82,7 +82,7 @@ DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'pet_rescue_db',
-#         'USER': 'pet_user',
+#         'USER': 'ann',
 #         'PASSWORD': 'ann2005',
 #         'HOST': 'localhost',
 #         'PORT': '5432',
